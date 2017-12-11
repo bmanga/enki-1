@@ -4,6 +4,8 @@ a fast 2D robot simulator
 
 © 1999-2017 Stéphane Magnenat and others ([full list](AUTHORS))
 
+Hacked for QT5 by Bernd Porr
+
 ## License
 
 [GPL 2.0](LICENSE).
@@ -20,7 +22,7 @@ To compile Enki and programs who depend on it, you need:
 * A build environment compatible with CMake.
 
 In addition, if you want the support for the viewer and Python bindings, you need:
-* [Qt 4](https://download.qt.io/archive/qt/4.8/4.8.6/)
+* QT5
 * [Python](https://www.python.org/) with development support
 * [Boost.Python](http://www.boost.org/doc/libs/1_65_1/libs/python/doc/html/)
 
@@ -46,25 +48,14 @@ or
 
 prior to cmake.
 
+In order to compile the viewer you need to go to the subdir "viewer" and
+do `qmake`, `make` and `sudo make install`.
+
+To run the demo "playground" you need to do again `qmake` and `make`.
+
 ### Use
 
-To use the library with a project using CMake, add these lines in your project:
-
-	find_package(enki REQUIRED)
-
-Then you can include the Enki directory with:
-
-	include_directories(${enki_INCLUDE_DIR})
-
-And link to the library, and optionally its viewer, by:
-
-	target_link_libraries(YOUR_TARGET ${enki_VIEWER_LIBRARIES} ${enki_LIBRARY} ...)
-
-Inside your code, include Enki and the viewer using:
-
-	#include <enki/PhysicalEngine.h>
-	#include <viewer/Viewer.h>
-
+Check out the .pro file in playground to see how to link against the libraries.
 
 ## Documentation
 

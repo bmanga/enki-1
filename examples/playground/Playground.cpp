@@ -1,5 +1,6 @@
 /*
     Enki - a fast 2D robot simulator
+    Copyright (C) 2017 Bernd Porr <mail@berndporr.me.uk>
     Copyright (C) 1999-2016 Stephane Magnenat <stephane at magnenat dot net>
     Copyright (C) 2004-2005 Markus Waibel <markus dot waibel at epfl dot ch>
     Copyright (c) 2004-2005 Antoine Beyeler <abeyeler at ab-ware dot com>
@@ -40,23 +41,12 @@
 #include <QtGui>
 #include <iostream>
 
-#ifdef USE_SDL
-#include <SDL.h>
-#endif
-
-/*!	\file Studio.cpp
-	\brief Test of the Qt-based viewer widget
-*/
-
 using namespace Enki;
 using namespace std;
 
 class EnkiPlayground : public ViewerWidget
 {
 protected:
-	#ifdef USE_SDL
-	QVector<SDL_Joystick *> joysticks;
-	#endif
 	QVector<EPuck*> epucks;
 	QMap<PhysicalObject*, int> bullets;
 	
@@ -159,8 +149,8 @@ public:
 		{
 			PhysicalObject* o = new PhysicalObject;
 			PhysicalObject::Hull hull;
-			hull.push_back(Enki::PhysicalObject::Part(Enki::Polygon() << Point(5,1) << Point(-5,1) << Point(-5,-1) << Point(5,-1), 2));
-			hull.push_back(Enki::PhysicalObject::Part(Enki::Polygon() << Point(1,5) << Point(-1,5) << Point(-1,-5) << Point(1,-5), 4));
+			hull.push_back(Enki::PhysicalObject::Part(Enki::Polygon() << Point(5,1) << Point(-5,1) << Point(-5,-1) << Point(5,-1), 0.1));
+			hull.push_back(Enki::PhysicalObject::Part(Enki::Polygon() << Point(1,5) << Point(-1,5) << Point(-1,-5) << Point(1,-5), 0.1));
 			o->setCustomHull(hull, 60);
 			o->setColor(Color(0.2, 0.4, 0.6));
 			o->collisionElasticity = 0.2;
@@ -195,41 +185,7 @@ public:
 		world->addObject(marxbot);
 		#endif // PROBLEM_MARXBOT
 		
-		#ifdef USE_SDL
-		if((SDL_Init(SDL_INIT_JOYSTICK)==-1))
-		{
-			cerr << "Error : Could not initialize SDL: " << SDL_GetError() << endl;
-			addDefaultsRobots(world);
-			return;
-		}
-		
-		int joystickCount = SDL_NumJoysticks();
-		for (int i = 0; i < joystickCount; ++i)
-		{
-			SDL_Joystick* joystick = SDL_JoystickOpen(i);
-			if (!joystick)
-			{
-				cerr << "Error: Can't open joystick " << i << endl;
-				continue;
-			}
-			if (SDL_JoystickNumAxes(joystick) < 2)
-			{
-				cerr << "Error: not enough axis on joystick" << i<< endl;
-				SDL_JoystickClose(joystick);
-				continue;
-			}
-			joysticks.push_back(joystick);
-			
-			EPuck *epuck = new EPuck;
-			//epuck->pos = Point(UniformRand(20, 100)(), UniformRand(20, 100)());
-			epuck->pos = Point(20, 20);
-			epucks.push_back(epuck);
-			world->addObject(epuck);
-		}
-		cout << "Added " << joystickCount << " controlled e-pucks." << endl;
-		#else // USE_SDL
 		addDefaultsRobots(world);
-		#endif // USE_SDL
 	}
 	
 	void addDefaultsRobots(World *world)
@@ -248,84 +204,12 @@ public:
 		//world->addObject(epuck);
 	}
 	
-	~EnkiPlayground()
-	{
-		#ifdef USE_SDL
-		for (int i = 0; i < joysticks.size(); ++i)
-			SDL_JoystickClose(joysticks[i]);
-		SDL_Quit();
-		#endif
-	}
-	
-	virtual void timerEvent(QTimerEvent * event)
-	{
-		static int fireCounter = 0;
-		#ifdef USE_SDL
-		SDL_JoystickUpdate();
-		doDumpFrames = false;
-		for (int i = 0; i < joysticks.size(); ++i)
-		{
-			EPuck* epuck = epucks[i];
-			
-			if (world->hasGroundTexture())
-				cout << "Robot " << i << " is on ground of colour " << world->getGroundColor(epuck->pos) << endl;
-			
-			#define SPEED_MAX 13.
-			//cout << "S " << epuck->infraredSensor2.getRayDist(0) << " " << epuck->infraredSensor2.getRayDist(1) << " " << epuck->infraredSensor2.getRayDist(2) << endl;
-			#if 0 
-			epuck->leftSpeed = - SDL_JoystickGetAxis(joysticks[i], 1) / (32767. / SPEED_MAX);
-			epuck->rightSpeed = - SDL_JoystickGetAxis(joysticks[i], 4) / (32767. / SPEED_MAX);
-			#else
-			double x = SDL_JoystickGetAxis(joysticks[i], 0) / (32767. / SPEED_MAX);
-			double y = -SDL_JoystickGetAxis(joysticks[i], 1) / (32767. / SPEED_MAX);
-			epuck->leftSpeed = y + x;
-			epuck->rightSpeed = y - x;
-			#endif
-			
-			if ((SDL_JoystickGetButton(joysticks[i], 6) || SDL_JoystickGetButton(joysticks[i], 7)) &&
-				(++fireCounter % 2) == 0)
-			{
-				PhysicalObject* o = new PhysicalObject;
-				Vector delta(cos(epuck->angle), sin(epuck->angle));
-				o->pos = epuck->pos + delta * 6;
-				o->speed = epuck->speed + delta * 10;
-				o->setCylindric(0.5, 0.5, 10);
-				o->dryFrictionCoefficient = 0.01;
-				o->setColor(Color(0.4, 0, 0));
-				o->collisionElasticity = 1;
-				bullets[o] = 300;
-				world->addObject(o);
-			}
-			doDumpFrames |= SDL_JoystickGetButton(joysticks[i], 0);
-		}
-		#endif
-		QMap<PhysicalObject*, int>::iterator i = bullets.begin();
-		while (i != bullets.end())
-		{
-			QMap<PhysicalObject*, int>::iterator oi = i;
-			++i;
-			if (oi.value())
-			{
-				oi.value()--;
-			}
-			else
-			{
-				PhysicalObject* o = oi.key();
-				world->removeObject(o);
-				bullets.erase(oi);
-				delete o;
-			}
-		}
-		ViewerWidget::timerEvent(event);
-	}
-	
 	virtual void sceneCompletedHook()
 	{
 		
 	}
 };
 
-// http://qtnode.net/wiki?title=Qt_with_cmake
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
@@ -336,11 +220,7 @@ int main(int argc, char *argv[])
 	if (igt)
 		gt = QGLWidget::convertToGLFormat(QImage(app.arguments().last()));
 	igt = !gt.isNull();
-	#if QT_VERSION >= QT_VERSION_CHECK(4,7,0)
 	const uint32_t *bits = (const uint32_t*)gt.constBits();
-	#else
-	uint32_t *bits = (uint32_t*)gt.bits();
-	#endif
 	World world(120, Color(0.9, 0.9, 0.9), igt ? World::GroundTexture(gt.width(), gt.height(), bits) : World::GroundTexture());
 	EnkiPlayground viewer(&world);
 	
