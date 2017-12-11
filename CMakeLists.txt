@@ -20,7 +20,6 @@ set(LIB_VERSION_PATCH 0)
 set(LIB_VERSION_STRING ${LIB_VERSION_MAJOR}.${LIB_VERSION_MINOR}.${LIB_VERSION_PATCH})
 
 add_subdirectory(enki)
-add_subdirectory(viewer)
 add_subdirectory(python)
 add_subdirectory(tests)
 add_subdirectory(examples)
