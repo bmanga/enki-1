@@ -8,9 +8,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 enable_testing()
 
 # check for Qt
-set(QT_USE_QTOPENGL TRUE)
-find_package(Qt4)
-find_package(OpenGL)
+# set(QT_USE_QTOPENGL TRUE)
+# find_package(OpenGL)
 
 # library version
 set(LIB_INSTALL_DIR lib CACHE FILEPATH "Where to install libraries")
@@ -20,7 +19,6 @@ set(LIB_VERSION_PATCH 0)
 set(LIB_VERSION_STRING ${LIB_VERSION_MAJOR}.${LIB_VERSION_MINOR}.${LIB_VERSION_PATCH})
 
 add_subdirectory(enki)
-add_subdirectory(python)
 add_subdirectory(tests)
 add_subdirectory(examples)
 

@@ -37,8 +37,6 @@
 #include <enki/robots/e-puck/EPuck.h>
 #include "MarxbotModel.h"
 #include <enki/robots/marxbot/Marxbot.h>
-#include "Thymio2Model.h"
-#include <enki/robots/thymio2/Thymio2.h>
 
 #ifdef Q_OS_WIN
 	#ifndef GL_BGRA
@@ -882,7 +880,6 @@ namespace Enki
 		// render all static types
 		managedObjects[&typeid(EPuck)] = new EPuckModel(this);
 		managedObjects[&typeid(Marxbot)] = new MarxbotModel(this);
-		managedObjects[&typeid(Thymio2)] = new Thymio2Model(this);
 		
 		// let subclass manage their static types
 		renderObjectsTypesHook();
