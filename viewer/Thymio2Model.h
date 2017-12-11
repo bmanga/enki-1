@@ -46,7 +46,7 @@ namespace Enki
 		virtual void cleanup(ViewerWidget* viewer);
 		virtual void draw(PhysicalObject* object) const;
 
-		unsigned textureDimension;
+		int textureDimension;
 		QImage bodyDiffusionMap0, bodyDiffusionMap1, bodyDiffusionMap2, bodyTexture;
 
 	protected:

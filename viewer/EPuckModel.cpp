@@ -152,7 +152,7 @@ namespace Enki
 		glPopMatrix();
 	}
 	
-	void EPuckModel::drawSpecial(PhysicalObject* object, int param) const
+	void EPuckModel::drawSpecial(PhysicalObject*, int) const
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE);

@@ -69,9 +69,9 @@ namespace Enki
 		{
 		public:
 			virtual void draw(PhysicalObject* object) const = 0;
-			virtual void drawSpecial(PhysicalObject* object, int param = 0) const { }
+			virtual void drawSpecial(PhysicalObject*, int) const { }
 			// for data managed by the viewer, called upon viewer destructor
-			virtual void cleanup(ViewerWidget* viewer) { }
+			virtual void cleanup(ViewerWidget*) { }
 		};
 		
 		// complex robot, one per robot type stored here
