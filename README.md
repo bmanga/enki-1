@@ -4,7 +4,7 @@ a fast 2D robot simulator
 
 © 1999-2017 Stéphane Magnenat and others ([full list](AUTHORS))
 
-Hacked for QT5 by Bernd Porr
+Hacked for QT5 by Bernd Porr <mail@berndporr.me.uk>
 
 ## License
 
@@ -20,11 +20,7 @@ To compile Enki and programs who depend on it, you need:
 * a working and fairly recent c++ compiler
 * [CMake](https://cmake.org/)
 * A build environment compatible with CMake.
-
-In addition, if you want the support for the viewer and Python bindings, you need:
 * QT5
-* [Python](https://www.python.org/) with development support
-* [Boost.Python](http://www.boost.org/doc/libs/1_65_1/libs/python/doc/html/)
 
 ### Enki simulator compilation under Unix (library)
 
