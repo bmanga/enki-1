@@ -34,15 +34,15 @@
 #ifndef __ENKI_VIEWER_MARXBOT_MODEL_H
 #define __ENKI_VIEWER_MARXBOT_MODEL_H
 
-#include "Viewer.h"
+#include "Enki.h"
 
 namespace Enki
 {
-	class MarxbotModel : public ViewerWidget::CustomRobotModel
+	class MarxbotModel : public EnkiWidget::CustomRobotModel
 	{
 	public:
-		MarxbotModel(ViewerWidget* viewer);
-		virtual void cleanup(ViewerWidget* viewer);
+		MarxbotModel(EnkiWidget* viewer);
+		virtual void cleanup(EnkiWidget* viewer);
 		virtual void draw(PhysicalObject* object) const;
 	};
 } // namespace Enki

@@ -32,8 +32,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <Viewer.h>
-#include <PhysicalEngine.h>
+#include <Enki.h>
 #include <EPuck.h>
 #include <Marxbot.h>
 #include <QApplication>
@@ -43,7 +42,7 @@
 using namespace Enki;
 using namespace std;
 
-class EnkiPlayground : public ViewerWidget
+class EnkiPlayground : public EnkiWidget
 {
 protected:
 	QVector<EPuck*> epucks;
@@ -51,7 +50,7 @@ protected:
 	
 public:
 	EnkiPlayground(World *world, QWidget *parent = 0) :
-		ViewerWidget(world, parent)
+		EnkiWidget(world, parent)
 	{
 		#define PROBLEM_GENERIC_TOY
 		#define PROBLEM_BALL_LINE

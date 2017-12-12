@@ -34,15 +34,15 @@
 #ifndef __ENKI_VIEWER_EPUCK_MODEL_H
 #define __ENKI_VIEWER_EPUCK_MODEL_H
 
-#include "Viewer.h"
+#include "Enki.h"
 
 namespace Enki
 {
-	class EPuckModel : public ViewerWidget::CustomRobotModel
+	class EPuckModel : public EnkiWidget::CustomRobotModel
 	{
 	public:
-		EPuckModel(ViewerWidget* viewer);
-		virtual void cleanup(ViewerWidget* viewer);
+		EPuckModel(EnkiWidget* viewer);
+		virtual void cleanup(EnkiWidget* viewer);
 		virtual void draw(PhysicalObject* object) const;
 		virtual void drawSpecial(PhysicalObject* object, int param) const;
 	};

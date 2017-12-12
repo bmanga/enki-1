@@ -10,7 +10,7 @@ HEADERS = robots/e-puck/EPuckModel.h \
           robots/marxbot/Marxbot.h \
           robots/DifferentialWheeled.h \
           objects/Objects.h \
-          BluetoothBase.h Interaction.h Random.h Viewer.h \
+          BluetoothBase.h Interaction.h Random.h Enki.h \
           Geometry.h PhysicalEngine.h Types.h \
           interactions/ActiveSoundSource.h \
           interactions/CircularCam.h \
@@ -23,7 +23,7 @@ SOURCES = robots/e-puck/EPuckModel.cpp \
            robots/marxbot/MarxbotModel.cpp \
            robots/marxbot/Marxbot.cpp \
            robots/DifferentialWheeled.cpp \
-           Viewer.cpp \
+           Enki.cpp \
            BluetoothBase.cpp Geometry.cpp PhysicalEngine.cpp Types.cpp \
            interactions/ActiveSoundSource.cpp \
            interactions/CircularCam.cpp \

@@ -47,7 +47,7 @@ inline Derived polymorphic_downcast(Base base)
 
 namespace Enki
 {
-	EPuckModel::EPuckModel(ViewerWidget* viewer)
+	EPuckModel::EPuckModel(EnkiWidget* viewer)
 	{
 		textures.resize(2);
 		textures[0] = viewer->bindTexture(QPixmap(QString(":/textures/epuck.png")), GL_TEXTURE_2D);
@@ -60,7 +60,7 @@ namespace Enki
 		lists[4] = GenEPuckWheelRight();
 	}
 	
-	void EPuckModel::cleanup(ViewerWidget* viewer)
+	void EPuckModel::cleanup(EnkiWidget* viewer)
 	{
 		for (int i = 0; i < textures.size(); i++)
 			viewer->deleteTexture(textures[i]);

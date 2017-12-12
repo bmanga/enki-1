@@ -46,7 +46,7 @@ inline Derived polymorphic_downcast(Base base)
 
 namespace Enki
 {
-	MarxbotModel::MarxbotModel(ViewerWidget* viewer)
+	MarxbotModel::MarxbotModel(EnkiWidget* viewer)
 	{
 		textures.resize(1);
 		textures[0] = viewer->bindTexture(QPixmap(QString(":/textures/marxbot.png")), GL_TEXTURE_2D);
@@ -55,7 +55,7 @@ namespace Enki
 		lists[1] = GenMarxbotWheel();
 	}
 	
-	void MarxbotModel::cleanup(ViewerWidget* viewer)
+	void MarxbotModel::cleanup(EnkiWidget* viewer)
 	{
 		for (int i = 0; i < textures.size(); i++)
 			viewer->deleteTexture(textures[i]);
