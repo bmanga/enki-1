@@ -1416,7 +1416,7 @@ namespace Enki
 	//! Viewer has started, by default show help
 	void EnkiWidget::started()
 	{
-		showHelp();
+		//showHelp();
 	}
 	
 	//! Help button or F1 have been pressed
