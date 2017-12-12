@@ -42,8 +42,8 @@
 #include <QVector3D>
 #include <QUrl>
 
-#include <enki/Geometry.h>
-#include <enki/PhysicalEngine.h>
+#include <Geometry.h>
+#include <PhysicalEngine.h>
 
 /*!	\file Viewer.h
 	\brief Definition of the Qt-based viewer widget

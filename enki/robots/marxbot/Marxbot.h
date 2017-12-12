@@ -34,8 +34,8 @@
 #ifndef __ENKI_MARXBOT_H
 #define __ENKI_MARXBOT_H
 
-#include <enki/robots/DifferentialWheeled.h>
-#include <enki/interactions/CircularCam.h>
+#include "DifferentialWheeled.h"
+#include "CircularCam.h"
 
 /*!	\file Marxbot.h
 	\brief Header of the marXbot robot

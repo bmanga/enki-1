@@ -1,10 +1,11 @@
 # Enki
 
-a fast 2D robot simulator
+a fast 2D robot simulator, with QT5 build system. This is a hacked
+version of the original enki simulator which uses QT5's qmake command
+and not cmake.
 
 © 1999-2017 Stéphane Magnenat and others ([full list](AUTHORS))
-
-Hacked for QT5 by Bernd Porr <mail@berndporr.me.uk>
+© 2017 Bernd Porr <mail@berndporr.me.uk>
 
 ## License
 
@@ -24,23 +25,23 @@ To compile Enki and programs who depend on it, you need:
 
 ### Enki simulator compilation under Unix (library)
 
-Those short instructions assume that you want to use "make" to build Enki.
+Change into the enki subdirectory and type:
 
-	cmake .
+	qmake
 
 and then build Enki by running:
 
 	make
 
-### Graphical frontend (QT5) compilation to view the robots
+and finally install the library with
+	
+	sudo make install
 
-In order to compile the QT based GUI, called "Viewer", you need to go to the subdir "viewer" and
-do `qmake`, `make` and `sudo make install`.
 
 ### Compiling/running the graphical demo (QT5) "playground"
 
 To compile the demo "playground" you need to do again `qmake` and `make`. This uses the
-previously compiled libraries.
+previously compiled enki library.
 
 To run it type "./playground ./track.png" which loads the playground with a sample track
 painted on the floor!

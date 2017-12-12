@@ -33,10 +33,10 @@
 
 #include "objects/Objects.h"
 #include "Viewer.h"
-#include "EPuckModel.h"
-#include <enki/robots/e-puck/EPuck.h>
-#include "MarxbotModel.h"
-#include <enki/robots/marxbot/Marxbot.h>
+#include "robots/e-puck/EPuckModel.h"
+#include "robots/e-puck/EPuck.h"
+#include "robots/marxbot/MarxbotModel.h"
+#include "robots/marxbot/Marxbot.h"
 
 #ifdef Q_OS_WIN
 	#ifndef GL_BGRA

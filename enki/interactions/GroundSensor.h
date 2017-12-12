@@ -34,8 +34,8 @@
 #ifndef __ENKI_GROUND_SENSOR_H
 #define __ENKI_GROUND_SENSOR_H
 
-#include <enki/PhysicalEngine.h>
-#include <enki/Interaction.h>
+#include <PhysicalEngine.h>
+#include <Interaction.h>
 
 /*!	\file GroundSensor.h
  \brief Header of the ground infrared sensor

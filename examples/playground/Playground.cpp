@@ -33,9 +33,9 @@
 */
 
 #include <Viewer.h>
-#include <enki/PhysicalEngine.h>
-#include <enki/robots/e-puck/EPuck.h>
-#include <enki/robots/marxbot/Marxbot.h>
+#include <PhysicalEngine.h>
+#include <EPuck.h>
+#include <Marxbot.h>
 #include <QApplication>
 #include <QtGui>
 #include <iostream>
@@ -53,9 +53,9 @@ public:
 	EnkiPlayground(World *world, QWidget *parent = 0) :
 		ViewerWidget(world, parent)
 	{
-		//#define PROBLEM_GENERIC_TOY
-		//#define PROBLEM_BALL_LINE
-		//#define PROBLEM_LONE_EPUCK
+		#define PROBLEM_GENERIC_TOY
+		#define PROBLEM_BALL_LINE
+		#define PROBLEM_LONE_EPUCK
 		
 		#ifdef PROBLEM_GENERIC_TOY
 		{

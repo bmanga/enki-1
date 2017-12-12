@@ -38,7 +38,7 @@
 	\brief Header of the features of differential wheeled robots
 */
 
-#include <enki/PhysicalEngine.h>
+#include <PhysicalEngine.h>
 
 namespace Enki
 {

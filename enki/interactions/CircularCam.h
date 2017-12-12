@@ -34,8 +34,8 @@
 #ifndef __ENKI_CIRCULARCAM_H
 #define __ENKI_CIRCULARCAM_H
 
-#include "../Interaction.h"
-#include "../PhysicalEngine.h"
+#include "Interaction.h"
+#include "PhysicalEngine.h"
 
 #include <valarray>
 

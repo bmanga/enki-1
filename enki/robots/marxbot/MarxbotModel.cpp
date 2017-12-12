@@ -31,10 +31,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "EPuckModel.h"
+#include "MarxbotModel.h"
 #include "objects/Objects.h"
-#include <enki/robots/marxbot/Marxbot.h>
-#include <enki/robots/e-puck/EPuck.h>
+#include <robots/marxbot/Marxbot.h>
 
 //! Asserts a dynamic cast.	Similar to the one in boost/cast.hpp
 template<typename Derived, typename Base>
@@ -47,20 +46,16 @@ inline Derived polymorphic_downcast(Base base)
 
 namespace Enki
 {
-	EPuckModel::EPuckModel(ViewerWidget* viewer)
+	MarxbotModel::MarxbotModel(ViewerWidget* viewer)
 	{
-		textures.resize(2);
-		textures[0] = viewer->bindTexture(QPixmap(QString(":/textures/epuck.png")), GL_TEXTURE_2D);
-		textures[1] = viewer->bindTexture(QPixmap(QString(":/textures/epuckr.png")), GL_TEXTURE_2D, GL_LUMINANCE8);
-		lists.resize(5);
-		lists[0] = GenEPuckBody();
-		lists[1] = GenEPuckRest();
-		lists[2] = GenEPuckRing();
-		lists[3] = GenEPuckWheelLeft();
-		lists[4] = GenEPuckWheelRight();
+		textures.resize(1);
+		textures[0] = viewer->bindTexture(QPixmap(QString(":/textures/marxbot.png")), GL_TEXTURE_2D);
+		lists.resize(2);
+		lists[0] = GenMarxbotBase();
+		lists[1] = GenMarxbotWheel();
 	}
 	
-	void EPuckModel::cleanup(ViewerWidget* viewer)
+	void MarxbotModel::cleanup(ViewerWidget* viewer)
 	{
 		for (int i = 0; i < textures.size(); i++)
 			viewer->deleteTexture(textures[i]);
@@ -68,15 +63,42 @@ namespace Enki
 			glDeleteLists(lists[i], 1);
 	}
 	
-	void EPuckModel::draw(PhysicalObject* object) const
+	void MarxbotModel::draw(PhysicalObject* object) const
 	{
 		DifferentialWheeled* dw = polymorphic_downcast<DifferentialWheeled*>(object);
 		
-		const double wheelRadius = 2.1;
+		const double wheelRadius = 2.9;
 		const double wheelCirc = 2 * M_PI * wheelRadius;
-		const double radiosityScale = 1.01;
 		
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
+		glColor3d(1, 1, 1);
+		
+		
+		// body
 		glPushMatrix();
+		glCallList(lists[0]);
+		glPopMatrix();
+		
+		// wheels
+		glPushMatrix();
+		glTranslatef(0,0,wheelRadius);
+			glPushMatrix();
+			glRotated((fmod(dw->rightOdometry, wheelCirc) * 360) / wheelCirc, 0, 1, 0);
+			glCallList(lists[1]);
+			glPopMatrix();
+			glPushMatrix();
+			glRotated(180.f, 0, 0, 1);
+			glRotated((fmod(-dw->leftOdometry, wheelCirc) * 360) / wheelCirc, 0, 1, 0);
+			glCallList(lists[1]);
+			glPopMatrix();
+		glPopMatrix();
+		
+		glDisable(GL_TEXTURE_2D);
+		
+		
+		/*const double radiosityScale = 1.01;
+		
 		glTranslated(0, 0, wheelRadius);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, textures[0]);
@@ -148,16 +170,6 @@ namespace Enki
 		glDisable(GL_BLEND);
 		glEnable(GL_LIGHTING);
 		
-		glDisable(GL_TEXTURE_2D);
-		glPopMatrix();
-	}
-	
-	void EPuckModel::drawSpecial(PhysicalObject*, int) const
-	{
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE);
-		glDisable(GL_TEXTURE_2D);
-		glCallList(lists[0]);
-		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);*/
 	}
 } // namespace Enki

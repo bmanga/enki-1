@@ -34,8 +34,8 @@
 #ifndef __ENKI_MICROPHONE_H
 #define __ENKI_MICROPHONE_H
 
-#include <enki/PhysicalEngine.h>
-#include <enki/Interaction.h>
+#include "PhysicalEngine.h"
+#include "Interaction.h"
 #include "ActiveSoundSource.h"
 
 #include <valarray>
