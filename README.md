@@ -1,10 +1,11 @@
-# Enki
+# Enki (QT5)
 
 a fast 2D robot simulator, with QT5 build system. This is a hacked
 version of the original enki simulator which uses QT5's qmake command
 and not cmake.
 
 © 1999-2017 Stéphane Magnenat and others ([full list](AUTHORS))
+
 © 2017 Bernd Porr <mail@berndporr.me.uk>
 
 ## License
@@ -18,9 +19,7 @@ This section explains how to compile Enki from the source distribution.
 ### Prerequisites
 
 To compile Enki and programs who depend on it, you need:
-* a working and fairly recent c++ compiler
-* [CMake](https://cmake.org/)
-* A build environment compatible with CMake.
+* a working and fairly recent C++ compiler
 * QT5
 
 ### Enki simulator compilation under Unix (library)
