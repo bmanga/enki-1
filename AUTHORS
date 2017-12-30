@@ -23,3 +23,6 @@ For minor contributions, see the commit log.
 e-puck 3D model by:
 Basilio Noris
 Vincent Becker (Mobsya)
+
+This has been converted by Bernd Porr to QT5 using the QT5 qmake
+framework.

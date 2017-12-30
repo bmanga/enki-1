@@ -12,9 +12,8 @@ a fast 2D robot simulator using the QT5 build system.
 
 ## Prerequisites
 
-To compile Enki and programs who depend on it, you need:
-* a working and fairly recent C++ compiler
-* QT5
+You need the QT5 library and its development packages to compile it.
+
 
 ## Enki simulator compilation under Unix (library)
 
@@ -36,4 +35,4 @@ and finally install the library with
 To compile the examples you need to do again `qmake` and `make`. This uses the
 previously compiled enki library.
 
-To run it type `./playground`
+To run it type, for example, `./playground`
