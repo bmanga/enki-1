@@ -408,9 +408,8 @@ int main(int argc, char *argv[])
 
 {
     QApplication app(argc, argv);
-    QString filename("playGround.png");
     QImage gt;
-    gt = QGLWidget::convertToGLFormat(QImage(filename));
+    gt = QGLWidget::convertToGLFormat(QImage(":/c.png"));
     if (gt.isNull()) {
         fprintf(stderr,"Texture file not found\n");
         exit(1);
