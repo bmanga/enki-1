@@ -42,24 +42,24 @@
 
 namespace Enki
 {
-	class Racer : public DifferentialWheeled
+    class Racer : public DifferentialWheeled
 	{
 	public:
-		//! The infrared sensor 0 (left)
-		IRSensor infraredSensor0;
-		//! The infrared sensor 1 (front-left)
-		IRSensor infraredSensor1;
-		//! The infrared sensor 2 (front)
-		IRSensor infraredSensor2;
-		//! The infrared sensor 3 (front)
-		IRSensor infraredSensor3;
-		//! The infrared sensor 4 (front-right)
-		IRSensor infraredSensor4;
-		//! The infrared sensor 5 (right)
-		IRSensor infraredSensor5;
-		//! The infrared sensor 6 (back)
-		IRSensor infraredSensor6;
-		//! The infrared sensor 7 (back)
+        //! The infrared sensor 0 (left)
+        IRSensor infraredSensor0;
+        //! The infrared sensor 1 (front-left)
+        IRSensor infraredSensor1;
+        //! The infrared sensor 2 (front)
+        IRSensor infraredSensor2;
+        //! The infrared sensor 3 (front)
+        IRSensor infraredSensor3;
+        //! The infrared sensor 4 (front-right)
+        IRSensor infraredSensor4;
+        //! The infrared sensor 5 (right)
+        IRSensor infraredSensor5;
+        //! The infrared sensor 6 (back)
+        IRSensor infraredSensor6;
+        //! The infrared sensor 7 (back)
 		IRSensor infraredSensor7;
 		//! Linear camera
 		CircularCam camera;
@@ -67,10 +67,33 @@ namespace Enki
 		GroundSensor groundSensorLeft;
 		//! Ground Sensor right
 		GroundSensor groundSensorRight;
+
+
+
+        //! Front predictor sensors
+
+        GroundSensor groundSensorFrontP1;
+        GroundSensor groundSensorFrontP2;
+        GroundSensor groundSensorFrontP3;
+        GroundSensor groundSensorFrontP4;
+        GroundSensor groundSensorFrontP5;
+        //! Back predictor sensors
+        GroundSensor groundSensorBackP1;
+        GroundSensor groundSensorBackP2;
+        GroundSensor groundSensorBackP3;
+        GroundSensor groundSensorBackP4;
+        GroundSensor groundSensorBackP5;
+
+        //! Ground Sensor left
+//        GroundSensor groundSensorLeft2;
+        //! Ground Sensor right
+//        GroundSensor groundSensorRight2;
+
+
 		
 	public:
 		Racer();
-	};
+    };
 }
 
 #endif
