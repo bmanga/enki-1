@@ -26,7 +26,17 @@ QT += opengl widgets
 CONFIG          += qt warn_on debuge debug
 QMAKE_CXXFLAGS += -std=c++0x -march=native -Wunused -pedantic
 
-#LIBS	+= /usr/local/lib/libenki.a
-LIBS	+= ../../enki/libenki.a
+LIBS	+= /usr/local/lib/libenki.a
 LIBS    += /home/sama/Documents/clBP/cmake-build-release/libclBP.a
+
+RESOURCES += \
+    textures.qrc
+
+
+copydata.commands = $(COPY_DIR) $$PWD/h.dat $$PWD/hh.dat $$OUT_PWD
+
+first.depends = $(first) copydata
+export(first.depends)
+export(copydata.commands)
+QMAKE_EXTRA_TARGETS += first copydata
 
