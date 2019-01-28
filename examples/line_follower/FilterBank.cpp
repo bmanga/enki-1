@@ -1,5 +1,5 @@
-#include "filterbank.h"
-#include "IcoFilters.h"
+#include "FilterBank.h"
+#include "Filter.h"
 
 
 #include <sstream>
@@ -12,32 +12,32 @@
 
 using namespace std;
 
-filterBank::filterBank()
+FilterBank::FilterBank()
 {
 
 }
 
-filterBank::~filterBank(){
+FilterBank::~FilterBank(){
 //    for (int i=0; i<nfilters; i++){
 //        delete filters[i];
 //    }
 //    delete[] filters;
 }
 
-void filterBank::setFilters(int _nfilters){
+void FilterBank::setFilters(int _nfilters){
     nfilters=_nfilters;
-    filters= new IcoFilters*[nfilters];
+    filters= new Filter*[nfilters];
     for (int i=0; i<nfilters; i++){
-        filters[i]= new IcoFilters();
+        filters[i]= new Filter();
     }
 }
 
-void filterBank::setCoeffFiles(int _index, string _name){
+void FilterBank::setCoeffFiles(int _index, string _name){
     assert((_index>=0)&&(_index<nfilters));
     filters[_index]->doFIRsetup(_name);
 }
 
-double filterBank::doFilterBank(int _filterIndex, double _input){
+double FilterBank::doFilterBank(int _filterIndex, double _input){
     assert((_filterIndex>=0)&&(_filterIndex<nfilters));
     double output=filters[_filterIndex]->doFIRfilter(_input);
     return (output);

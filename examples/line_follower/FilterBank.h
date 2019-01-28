@@ -1,7 +1,6 @@
-#ifndef FILTERBANK_H
-#define FILTERBANK_H
+#pragma once
 
-#include "IcoFilters.h"
+#include "Filter.h"
 
 #include <sstream>
 #include <iomanip>
@@ -13,18 +12,16 @@
 
 using namespace std;
 
-class filterBank
+class FilterBank
 {
 public:
-    filterBank();
-    ~filterBank();
+    FilterBank();
+    ~FilterBank();
     void setFilters(int _nfilters);
     void setCoeffFiles(int _index, string _name);
     double doFilterBank(int _filterIndex, double _input);
 private:
     int nfilters = 0;
-    IcoFilters** filters = NULL;
+    Filter** filters = NULL;
 
 };
-
-#endif // FILTERBANK_H

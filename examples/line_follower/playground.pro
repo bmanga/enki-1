@@ -12,15 +12,15 @@ INCLUDEPATH += /home/sama/Documents/clBP/include
 
 # Input
 HEADERS += Racer.h \
-    Ico.h \
-    IcoFilters.h \
-    filterbank.h
+    Filter.h \
+    ICO.h \
+    FilterBank.h
 
 SOURCES += run.cpp \
     Racer.cpp \
-    Ico.cpp \
-    IcoFilters.cpp \
-    filterbank.cpp
+    Filter.cpp \
+    ICO.cpp \
+    FilterBank.cpp
 
 QT += opengl widgets
 CONFIG          += qt warn_on debuge debug

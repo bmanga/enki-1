@@ -1,5 +1,4 @@
-#ifndef ICO_H
-#define ICO_H
+#pragma once
 
 #include <iostream>
 #include<math.h>
@@ -37,5 +36,3 @@ private:
     double sum=0;
 
 };
-
-#endif // ICO_H

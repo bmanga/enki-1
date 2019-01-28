@@ -1,5 +1,4 @@
-#ifndef ICOFILTERS_H
-#define ICOFILTERS_H
+#pragma once
 
 #include <sstream>
 #include <iomanip>
@@ -11,11 +10,11 @@
 using namespace std;
 
 
-class IcoFilters
+class Filter
 {
 public:
-    IcoFilters();
-    ~IcoFilters();
+    Filter();
+    ~Filter();
     void doFIRsetup(string _fileName);
     double doFIRfilter(double _input);
 
@@ -27,5 +26,3 @@ private:
     int limit=0;
     double* buffer=0;
 };
-
-#endif // ICOFILTERS_H

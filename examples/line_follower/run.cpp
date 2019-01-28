@@ -49,12 +49,12 @@ It has also a camera which looks to the front and IR sensors
 #include <iomanip>
 
 #include "Racer.h"
-#include "Ico.h"
+#include "ICO.h"
 #include "clbp/Neuron.h"
 #include "clbp/Layer.h"
 #include "clbp/Net.h"
-#include "filterbank.h"
-#include "IcoFilters.h"
+#include "FilterBank.h"
+#include "Filter.h"
 
 
 #define bpLearner //use reflex or icoLearner or bpLearner
@@ -66,7 +66,7 @@ It has also a camera which looks to the front and IR sensors
         #define filterBnk
         #define PredDiff
 #endif
-//#define doFilter //or do filterBank or nofilter
+//#define doFilter //or do FilterBank or nofilter
 //#define noFilter
 //#define filterBnk
 //#define PredBinary
@@ -106,14 +106,14 @@ private:
     Ico* ico;
 #endif
 #ifdef bpLearner
-    IcoNet* icoNet;
+    Net *net;
 #endif
 
 #ifdef doFilter
-    IcoFilters** icoFilter = 0;
+    Filter** filter = 0;
 #endif
 #ifdef filterBnk
-    filterBank** filterBanks= 0;
+    FilterBank** filterBank= 0;
 #endif
 public:
     EnkiPlayground(World *world, QWidget *parent = 0):
@@ -126,13 +126,13 @@ public:
         world->addObject(racer);
 
 #ifdef filterBnk
-        filterBanks = new filterBank*[nInputs];
+        filterBank = new FilterBank*[nInputs];
         string filenames[nFilters] = {"h.dat", "hh.dat"};
         for (int i=0; i<nInputs; i++){
-            filterBanks[i]= new filterBank();
-            filterBanks[i]->setFilters(nFilters);
+            filterBank[i]= new FilterBank();
+            filterBank[i]->setFilters(nFilters);
             for (int j=0; j<nFilters; j++){
-                filterBanks[i]->setCoeffFiles(j, filenames[j]);
+                filterBank[i]->setCoeffFiles(j, filenames[j]);
             }
         }
         nInputs = nInputs * nFilters;
@@ -145,16 +145,16 @@ public:
         int nLayers=2;
         int nNeurons[nLayers]={2,1};
         int* nNeuronsp=nNeurons;
-        icoNet = new IcoNet(nLayers, nNeuronsp, nInputs);
-        icoNet->initWeights(IcoNeuron::W_RANDOM, IcoNeuron::B_NONE);
+        net = new Net(nLayers, nNeuronsp, nInputs);
+        net->initWeights(Neuron::W_RANDOM, Neuron::B_NONE);
 #endif
 #ifdef doFilter
         string filename = "h.dat";
 
-        icoFilter= new IcoFilters*[nInputs];
+        filter= new Filter*[nInputs];
         for (int i=0; i<nInputs; i++){
-            icoFilter[i]= new IcoFilters();
-            icoFilter[i]->doFIRsetup(filename);
+            filter[i]= new Filter();
+            filter[i]->doFIRsetup(filename);
         }
 #endif
 
@@ -257,7 +257,7 @@ public:
 #ifdef doFilter
         double pred_filtered[nInputs];
         for (int i=0; i<nInputs; i++){
-            pred_filtered[i]=icoFilter[i]->doFIRfilter(pred[i]);
+            pred_filtered[i]=filter[i]->doFIRfilter(pred[i]);
             cout<<"FILTER "<<i<<endl;
             fprintf(stderr,"program: the Pred value: %f\n", pred[i]);
             fprintf(stderr,"program: the Filtered value: %f\n", pred_filtered[i]);
@@ -272,7 +272,7 @@ public:
             cout << "****iteration: "<< i << endl;
             cout << "Predtor Value is: " << pred[i] << endl;
             for (int j=0; j<nFilters; j++){
-                pred_filtered[i][j]=filterBanks[i]->doFilterBank(j, pred[i]);
+                pred_filtered[i][j]=filterBank[i]->doFilterBank(j, pred[i]);
                 cout << "The "<< j << "th " << "filtered value is: " << pred_filtered[i][j] << endl;
             }
         }
@@ -322,19 +322,19 @@ public:
         int gain=100;
 
         cout<< "MAIN PROGRAM: NEXT ITERATION"<<endl;
-        icoNet->setInputs(pred_pointer);
+        net->setInputs(pred_pointer);
         double learningRate=0.01;
-        icoNet->setLearningRate(learningRate);
-        icoNet->propInputs();
+        net->setLearningRate(learningRate);
+        net->propInputs();
         double leadError=error;
-        icoNet->setError(leadError);
-        icoNet->propError();
-        icoNet->updateWeights();
+        net->setError(leadError);
+        net->propError();
+        net->updateWeights();
         //need to do weight change first
-        icoNet->saveWeights();
-        double weightDistance=icoNet->getWeightDistance();
-        double icoOutput= icoNet->getOutput(0);
-        double icoOutputSum= icoNet->getSumOutput(0);
+        net->saveWeights();
+        double weightDistance=net->getWeightDistance();
+        double icoOutput= net->getOutput(0);
+        double icoOutputSum= net->getSumOutput(0);
         double error2 = (error + icoOutput) * gain;
         racer->leftSpeed  = speed + error2;
         racer->rightSpeed = speed - error2;

@@ -1,4 +1,4 @@
-#include "IcoFilters.h"
+#include "Filter.h"
 
 #include <sstream>
 #include <iomanip>
@@ -10,16 +10,16 @@
 
 using namespace std;
 
-IcoFilters::IcoFilters(){
+Filter::Filter(){
 
 }
 
-IcoFilters::~IcoFilters(){
+Filter::~Filter(){
      delete [] coefficients;
      delete [] buffer;
 }
 
-void IcoFilters::doFIRsetup(string _fileName)
+void Filter::doFIRsetup(string _fileName)
 {
     filename=_fileName;
 
@@ -70,7 +70,7 @@ void IcoFilters::doFIRsetup(string _fileName)
 
 }
 
-double IcoFilters::doFIRfilter(double _input){
+double Filter::doFIRfilter(double _input){
     /* shifting the buffer */
     limit=nTaps-1;
     for (int i=0; i<limit; i++){
