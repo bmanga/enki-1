@@ -47,6 +47,7 @@ It has also a camera which looks to the front and IR sensors
 #include <math.h>
 #include <sstream>
 #include <iomanip>
+#include <random>
 
 #include "Racer.h"
 #include "ICO.h"
@@ -77,6 +78,10 @@ It has also a camera which looks to the front and IR sensors
 
 using namespace Enki;
 using namespace std;
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<float> dist(-3, 3);
 
 int line=0;
 int iterateCount=0;
@@ -176,7 +181,7 @@ public:
 
 
 	}
-	// here we do all the behavioural computations
+    //  we do all the behavioural computations
 	// as an example: line following and obstacle avoidance
 	virtual void sceneCompletedHook()
 	{
@@ -336,8 +341,8 @@ public:
         double icoOutput= net->getOutput(0);
         double icoOutputSum= net->getSumOutput(0);
         double error2 = (error + icoOutput) * gain;
-        racer->leftSpeed  = speed + error2;
-        racer->rightSpeed = speed - error2;
+        racer->leftSpeed  = speed + error2 + dist(gen); //HERE
+        racer->rightSpeed = speed - error2 + dist(gen);
 
 #endif
 
