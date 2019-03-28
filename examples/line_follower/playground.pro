@@ -1,12 +1,7 @@
 TEMPLATE = app
 TARGET = run
 INCLUDEPATH += .
-INCLUDEPATH += ../../enki
-INCLUDEPATH += ../../enki/interactions
-INCLUDEPATH += ../../enki/objects
-INCLUDEPATH += ../../enki/robots
-INCLUDEPATH += ../../enki/textures
-INCLUDEPATH += ../../enki/widgets
+
 INCLUDEPATH += /usr/local/include/enki
 INCLUDEPATH += /home/sama/Documents/clBP/include
 
@@ -24,10 +19,10 @@ SOURCES += run.cpp \
 
 QT += opengl widgets
 CONFIG          += qt warn_on debuge debug
-QMAKE_CXXFLAGS += -std=c++0x -march=native -Wunused -pedantic
+QMAKE_CXXFLAGS += -std=c++0x -march=native -Wunused -pedantic -lenki
+QMAKE_LFLAGS += -lenki
 
-LIBS	+= /usr/local/lib/libenki.a
-LIBS    += /home/sama/Documents/clBP/cmake-build-release/libclBP.a
+LIBS    += /home/sama/Documents/clBP/cmake-build-release/libclBP.a /home/sama/Documents/enki-1/enki/libenki.a
 
 RESOURCES += \
     textures.qrc

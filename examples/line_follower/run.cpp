@@ -37,7 +37,7 @@ Custom Robot example which has ground sensors and follows a line
 It has also a camera which looks to the front and IR sensors
 */
 
-#include <Enki.h>
+#include <../../enki/Enki.h>
 #include <QApplication>
 #include <QtGui>
 #include <iostream>
@@ -106,7 +106,7 @@ private:
     Ico* ico;
 #endif
 #ifdef bpLearner
-    IcoNet* icoNet;
+    Net* net;
 #endif
 
 #ifdef doFilter
@@ -145,8 +145,8 @@ public:
         int nLayers=2;
         int nNeurons[nLayers]={2,1};
         int* nNeuronsp=nNeurons;
-        icoNet = new IcoNet(nLayers, nNeuronsp, nInputs);
-        icoNet->initWeights(IcoNeuron::W_RANDOM, IcoNeuron::B_NONE);
+        net = new Net(nLayers, nNeuronsp, nInputs);
+        net->initWeights(Neuron::W_RANDOM, Neuron::B_NONE);
 #endif
 #ifdef doFilter
         string filename = "h.dat";
@@ -322,20 +322,20 @@ public:
         int gain=100;
 
         cout<< "MAIN PROGRAM: NEXT ITERATION"<<endl;
-        icoNet->setInputs(pred_pointer);
+        net->setInputs(pred_pointer);
         double learningRate=0.01;
-        icoNet->setLearningRate(learningRate);
-        icoNet->propInputs();
+        net->setLearningRate(learningRate);
+        net->propInputs();
         double leadError=error;
-        icoNet->setError(leadError);
-        icoNet->propError();
-        icoNet->updateWeights();
+        net->setError(leadError);
+        net->propError();
+        net->updateWeights();
         //need to do weight change first
-        icoNet->saveWeights();
-        double weightDistance=icoNet->getWeightDistance();
-        double icoOutput= icoNet->getOutput(0);
-        double icoOutputSum= icoNet->getSumOutput(0);
-        double error2 = (error + icoOutput) * gain;
+        net->saveWeights();
+        double weightDistance=net->getWeightDistance();
+        double Output= net->getOutput(0);
+        double OutputSum= net->getSumOutput(0);
+        double error2 = (error + Output) * gain;
         racer->leftSpeed  = speed + error2;
         racer->rightSpeed = speed - error2;
 
