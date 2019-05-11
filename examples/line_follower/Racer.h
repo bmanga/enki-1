@@ -35,10 +35,10 @@
 #ifndef __ENKI_RACER_H
 #define __ENKI_RACER_H
 
-#include <DifferentialWheeled.h>
-#include <IRSensor.h>
-#include <CircularCam.h>
-#include <GroundSensor.h>
+#include <enki/robots/DifferentialWheeled.h>
+#include <enki/interactions/IRSensor.h>
+#include <enki/interactions/CircularCam.h>
+#include <enki/interactions/GroundSensor.h>
 
 namespace Enki
 {
@@ -77,12 +77,14 @@ namespace Enki
         GroundSensor groundSensorFrontP3;
         GroundSensor groundSensorFrontP4;
         GroundSensor groundSensorFrontP5;
+        GroundSensor groundSensorFrontP0;
+
+        GroundSensor groundSensorFrontP6;
+
+
         //! Back predictor sensors
-        GroundSensor groundSensorBackP1;
-        GroundSensor groundSensorBackP2;
-        GroundSensor groundSensorBackP3;
-        GroundSensor groundSensorBackP4;
-        GroundSensor groundSensorBackP5;
+
+
 
         //! Ground Sensor left
 //        GroundSensor groundSensorLeft2;

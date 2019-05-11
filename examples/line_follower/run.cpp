@@ -53,11 +53,14 @@ It has also a camera which looks to the front and IR sensors
 #include "clbp/Neuron.h"
 #include "clbp/Layer.h"
 #include "clbp/Net.h"
+#include "../lib/Net.cpp"
+#include "../lib/Layer.cpp"
+#include "../lib/Neuron.cpp"
 #include "filterbank.h"
 #include "IcoFilters.h"
 
 
-#define bpLearner //use reflex or icoLearner or bpLearner
+#define reflex //use reflex or icoLearner or bpLearner
 #ifdef icoLearner
         #define PredDiff //or not defined
         #define doFilter
@@ -78,11 +81,14 @@ It has also a camera which looks to the front and IR sensors
 using namespace Enki;
 using namespace std;
 
+double	maxx = 300;
+double	maxy = 300;
+
 int line=0;
 int iterateCount=0;
-int delay =0;
+int delay=0;
 
-int nPredictors=4; //this cannot be an odd number for icoLearner
+int nPredictors=6; //this cannot be an odd number for icoLearner
 #ifdef PredDiff
 int nInputs=nPredictors/2;
 #endif
@@ -95,36 +101,39 @@ int nFilters = 2;
 
 class EnkiPlayground : public EnkiWidget
 {
-private:
+protected:
 	Racer* racer;
-    const double speed = 30;
+    double speed = 90;
     double prevX;
     double prevY;
     double prevA;
-
 #ifdef icoLearner
     Ico* ico;
 #endif
 #ifdef bpLearner
     Net* net;
 #endif
-
 #ifdef doFilter
     IcoFilters** icoFilter = 0;
 #endif
 #ifdef filterBnk
     filterBank** filterBanks= 0;
 #endif
+    FILE* flog = NULL;
+    FILE* errorlog = NULL;
+    FILE* fcoord = NULL;
 public:
     EnkiPlayground(World *world, QWidget *parent = 0):
 		EnkiWidget(world, parent)
 	{
+        flog = fopen("flog.tsv","wt");
+        fcoord = fopen("coord.tsv","wt");
+        errorlog=fopen("error.txt","wt");
         racer = new Racer;
-        racer->pos = Point(0, 60); // x and y of the start point
+        racer->pos = Point(maxx/2, maxy/2); // x and y of the start point
 		racer->leftSpeed = speed;
 		racer->rightSpeed = speed;
         world->addObject(racer);
-
 #ifdef filterBnk
         filterBanks = new filterBank*[nInputs];
         string filenames[nFilters] = {"h.dat", "hh.dat"};
@@ -137,13 +146,12 @@ public:
         }
         nInputs = nInputs * nFilters;
 #endif
-
 #ifdef icoLearner
         ico= new Ico(nInputs);
 #endif
 #ifdef bpLearner
-        int nLayers=2;
-        int nNeurons[nLayers]={2,1};
+        int nLayers=4;
+        int nNeurons[nLayers]={12,6,3,1};
         int* nNeuronsp=nNeurons;
         net = new Net(nLayers, nNeuronsp, nInputs);
         net->initWeights(Neuron::W_RANDOM, Neuron::B_NONE);
@@ -157,12 +165,9 @@ public:
             icoFilter[i]->doFIRsetup(filename);
         }
 #endif
-
 #ifdef filterBnk
         nInputs = nInputs / nFilters;
 #endif
-
-
         std::ofstream myfilestat;
         myfilestat.open ("stat.txt", fstream::app);
         myfilestat << nInputs << "\n";
@@ -172,10 +177,14 @@ public:
         }
 #endif
         myfilestat.close();
-
-
-
 	}
+
+    ~EnkiPlayground(){
+        fclose(flog);
+        fclose(fcoord);
+        fclose(errorlog);
+    }
+
 	// here we do all the behavioural computations
 	// as an example: line following and obstacle avoidance
 	virtual void sceneCompletedHook()
@@ -203,33 +212,30 @@ public:
 		double leftGround = racer->groundSensorLeft.getValue();
 		double rightGround = racer->groundSensorRight.getValue();
         double error = errorGain * (leftGround - rightGround);
-        fprintf(stderr,"program: the error value: %f\n", error);
+       // fprintf(stderr,"program: the error value: %f\n", error);
 
+        fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
+        fprintf(errorlog, "%e\n", error);
+         //fprintf(errorlog, "%e\t%e\n", leftGround, rightGround);
 
 #ifdef reflex
-        int gain=40;
+        int gain=300;
+        speed=80;
 
         racer->leftSpeed  = speed + error * gain;
         racer->rightSpeed = speed - error * gain;
 #endif
 #ifndef reflex
-
-
         //predictor sensors:
         double pred[nPredictors]; // exception
 
-
+        pred[4] = racer->groundSensorFrontP0.getValue();
         pred[0] = racer->groundSensorFrontP1.getValue();
         pred[2] = racer->groundSensorFrontP2.getValue();
 //        pred[2] = racer->groundSensorFrontP3.getValue();
         pred[3] = racer->groundSensorFrontP4.getValue();
         pred[1] = racer->groundSensorFrontP5.getValue();
-
-        pred[4] = racer->groundSensorBackP1.getValue();
-        pred[6] = racer->groundSensorBackP2.getValue();
-//        pred[7] = racer->groundSensorBackP3.getValue();
-        pred[7] = racer->groundSensorBackP4.getValue();
-        pred[5] = racer->groundSensorBackP5.getValue();
+        pred[5] = racer->groundSensorFrontP6.getValue();
 
 #ifdef PredBinary
         for (int i=0; i<nPredictors; i++){
@@ -318,9 +324,7 @@ public:
 #endif
 
 #ifdef bpLearner
-
         int gain=100;
-
         cout<< "MAIN PROGRAM: NEXT ITERATION"<<endl;
         net->setInputs(pred_pointer);
         double learningRate=0.01;
@@ -342,13 +346,7 @@ public:
 #endif
 
 #endif
-
         line=line+1;
-
-        std::ofstream myfile;
-        myfile.open ("error.txt", fstream::app);
-        myfile << line << " " << error << "\n";
-        myfile.close();
 
         std::ofstream myfileLeft;
         myfileLeft.open ("leftGround.txt", fstream::app);
@@ -405,25 +403,20 @@ public:
 };
 
 int main(int argc, char *argv[])
-
 {
+    srand(3);
     QApplication app(argc, argv);
     QImage gt;
-    gt = QGLWidget::convertToGLFormat(QImage(":/c.png"));
+    gt = QGLWidget::convertToGLFormat(QImage("cc.png"));
     if (gt.isNull()) {
         fprintf(stderr,"Texture file not found\n");
         exit(1);
     }
     const uint32_t *bits = (const uint32_t*)gt.constBits();
-    World world(120, Color(0.9, 0.9, 0.9), World::GroundTexture(gt.width(), gt.height(), bits));
+    World world(maxx, maxy,
+                Color(1000, 1000, 1000), World::GroundTexture(gt.width(), gt.height(), bits));
+    cout<<gt.width()<<" "<<gt.height()<<endl;
     EnkiPlayground viewer(&world);
     viewer.show();
     return app.exec();
 }
-
-
-
-
-
-
-
