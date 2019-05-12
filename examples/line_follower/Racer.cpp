@@ -52,16 +52,13 @@ namespace Enki
     }
 
 	{
-
+        groundSensorArray = new GroundSensor*[nSensors];
         addLocalInteraction(&infraredSensorLeft);
         addLocalInteraction(&infraredSensorRight);
 		addLocalInteraction(&camera);
 		addLocalInteraction(&groundSensorLeft);
 		addLocalInteraction(&groundSensorRight);
 
-        groundSensorArray = new GroundSensor*[nSensors];
-
-		
         setRectangular(20,10,5, 80); // length, width, height, mass of the robot
         setColor(0);
     }
@@ -71,6 +68,7 @@ namespace Enki
         int startPoint=(_nPred -1) * _spacing;
         for (int i=iterate; i<_nPred+iterate; i++){
             groundSensorArray[i]= new GroundSensor(this, Vector(_predPos , -startPoint+ i * _spacing), 0, 1, 1, -0.731059,2);
+            addLocalInteraction(groundSensorArray[i]);
         }
         iterate += _nPred;
     }

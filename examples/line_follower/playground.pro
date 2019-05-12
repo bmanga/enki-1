@@ -26,7 +26,7 @@ RESOURCES += \
     textures.qrc
 
 
-copydata.commands = $(COPY_DIR) $$PWD/h.dat $$PWD/cc.png $$PWD/hh.dat $$OUT_PWD
+copydata.commands = $(COPY_DIR) $$PWD/cc.png $$OUT_PWD
 
 first.depends = $(first) copydata
 export(first.depends)

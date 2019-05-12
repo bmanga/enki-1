@@ -105,7 +105,8 @@ protected:
     double maxT = MAXT;
     double dampingCoeff = DAMPINGCOEFF;
 #endif
-    FILE* flog = NULL;
+    FILE* predlog = NULL;
+    FILE** filtlog = NULL;
     FILE* errorlog = NULL;
     FILE* fcoord = NULL;
 
@@ -113,9 +114,17 @@ public:
     EnkiPlayground(World *world, QWidget *parent = 0):
 		EnkiWidget(world, parent)
 	{
-        flog = fopen("flog.tsv","wt");
+        filtlog = new FILE*[nFilters];
+
+        filtlog[0]= fopen("fp1.tsv","wt");
+        filtlog[1]= fopen("fp2.tsv","wt");
+        filtlog[2]= fopen("fp3.tsv","wt");
+        filtlog[3]= fopen("fp4.tsv","wt");
+        filtlog[4]= fopen("fp5.tsv","wt");
+
+        predlog = fopen("predictors.tsv","wt");
         fcoord = fopen("coord.tsv","wt");
-        errorlog=fopen("error.tsv","wt");
+        errorlog = fopen("error.tsv","wt");
         racer = new Racer(nInputs);
         racer->setPreds(ROW1P,ROW1N,ROW1S);
         racer->setPreds(ROW2P,ROW2N,ROW2S);
@@ -168,7 +177,7 @@ public:
 #endif
         std::ofstream myfilestat;
         myfilestat.open ("stat.txt", fstream::app);
-        myfilestat << nInputs << "\n";
+        myfilestat << nPredictors << "\n";
 #ifdef bpLearner
         for (int i=0; i<nLayers; i++){
             myfilestat << nNeurons[i] << "\n";
@@ -178,11 +187,17 @@ public:
 	}
 
     ~EnkiPlayground(){
-        fclose(flog);
+        fclose(predlog);
         fclose(fcoord);
         fclose(errorlog);
+        fclose(filtlog[0]);
+        fclose(filtlog[1]);
+        fclose(filtlog[2]);
+        fclose(filtlog[3]);
+        fclose(filtlog[4]);
         delete[] pred;
         delete[] diffpred;
+
     }
 
 	// here we do all the behavioural computations
@@ -205,12 +220,14 @@ public:
         racer->rightSpeed = speed - error;
 #endif
 #ifndef reflex
-        for(int i=0;i<racer->getNsensors();i++) {
-            pred[i] = -(racer->getSensorArrayValue(i))*10;
+        for(int i=0; i<nInputs; i++) {
+            pred[i] = racer->groundSensorArray[i]->getValue(); //getSensorArrayValue(i);
             // workaround of a bug in Enki
-            if (pred[i]<0) pred[i] = 0;
+//            cout<<"PRED value is: "<<pred[i]<<endl;
+            //if (pred[i]<0) pred[i] = 0;
             //if (i>=racer->getNsensors()/2) fprintf(stderr,"%e ",pred[i]);
         }
+
 
 #ifdef PredDiff
         /* using the difference of the two predictors as the input: */
@@ -224,6 +241,10 @@ public:
 //            diffpred[i+ROW1N/2+ROW2N/2]=predGain * (pred[ROW3N+ROW2N+ROW1N-1-i]-pred[i+ROW1N+ROW2N]);
 //        }
 
+        for(int i=0; i<nPredictors; i++) {
+            fprintf(predlog,"%e\t",diffpred[i]);
+        }
+        fprintf(predlog,"\n");
 #endif
 #ifndef PredDiff
         diffpred=pred;
@@ -234,8 +255,13 @@ public:
         for (int i=0; i<nPredictors; i++){
             for (int j=0; j<nFilters; j++){
                 pred_filtered[i][j]=bandpass[i][j]->filter(diffpred[i]);
+                fprintf(filtlog[j],"%e\t",pred_filtered[i][j]);
             }
         }
+        for (int i=0; i<nFilters; i++){
+            fprintf(filtlog[i],"\n");
+        }
+
         double* pred_pointer=pred_filtered[0];
  #endif
 
@@ -255,7 +281,7 @@ public:
         net->propError();
         net->updateWeights();
         //need to do weight change first
-        net->saveWeights();
+        //net->saveWeights();
         double weightDistance=net->getWeightDistance();
         double Output= net->getOutput(0);
         double OutputSum= net->getSumOutput(0);
@@ -267,21 +293,6 @@ public:
 
 #endif
         line=line+1;
-
-#ifdef filterBank
-        std::ofstream myfilep[nPredictors];
-        char c = '0';
-        for (int p=0; p<nPredictors; p++){
-            string s = "predictor";
-            c += 1;
-            s += c;
-            s += ".txt";
-        myfilep[p].open (s, fstream::app);
-        myfilep[p] << line << " " << pred[p] << " ";
-        myfilep[p] << pred_filtered[p][0] << " "<< pred_filtered[p][1] << "\n";
-        myfilep[p].close();
-        }
-#endif
 	}
 };
 
