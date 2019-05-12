@@ -7,15 +7,13 @@ INCLUDEPATH += /home/sama/Documents/clBP/include
 
 # Input
 HEADERS += Racer.h \
-    Ico.h \
-    IcoFilters.h \
-    filterbank.h
+    bandpass.h \
+    globals.h \
+    parameters.h
 
 SOURCES += run.cpp \
     Racer.cpp \
-    Ico.cpp \
-    IcoFilters.cpp \
-    filterbank.cpp
+    bandpass.cpp
 
 QT += opengl widgets
 CONFIG          += qt warn_on debuge debug

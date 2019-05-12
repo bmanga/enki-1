@@ -39,28 +39,32 @@
 #include <enki/interactions/IRSensor.h>
 #include <enki/interactions/CircularCam.h>
 #include <enki/interactions/GroundSensor.h>
+#include "parameters.h"
 
 namespace Enki
 {
     class Racer : public DifferentialWheeled
 	{
 	public:
+
+        Racer(int _nSensors);
+
+        inline int getNsensors() {
+            return nSensors;
+        }
+
+        inline double getSensorArrayValue(int index) {
+            return groundSensorArray[index]->getValue();
+        }
+
+        void setPreds(int _predPos, int _nPred, int _spacing);
+
+        int nSensors;
+
         //! The infrared sensor 0 (left)
-        IRSensor infraredSensor0;
+        IRSensor infraredSensorLeft;
         //! The infrared sensor 1 (front-left)
-        IRSensor infraredSensor1;
-        //! The infrared sensor 2 (front)
-        IRSensor infraredSensor2;
-        //! The infrared sensor 3 (front)
-        IRSensor infraredSensor3;
-        //! The infrared sensor 4 (front-right)
-        IRSensor infraredSensor4;
-        //! The infrared sensor 5 (right)
-        IRSensor infraredSensor5;
-        //! The infrared sensor 6 (back)
-        IRSensor infraredSensor6;
-        //! The infrared sensor 7 (back)
-		IRSensor infraredSensor7;
+        IRSensor infraredSensorRight;
 		//! Linear camera
 		CircularCam camera;
 		//! Ground Sensor left
@@ -68,33 +72,12 @@ namespace Enki
 		//! Ground Sensor right
 		GroundSensor groundSensorRight;
 
-
+        GroundSensor** groundSensorArray;
+        int iterate=0;
 
         //! Front predictor sensors
 
-        GroundSensor groundSensorFrontP1;
-        GroundSensor groundSensorFrontP2;
-        GroundSensor groundSensorFrontP3;
-        GroundSensor groundSensorFrontP4;
-        GroundSensor groundSensorFrontP5;
-        GroundSensor groundSensorFrontP0;
 
-        GroundSensor groundSensorFrontP6;
-
-
-        //! Back predictor sensors
-
-
-
-        //! Ground Sensor left
-//        GroundSensor groundSensorLeft2;
-        //! Ground Sensor right
-//        GroundSensor groundSensorRight2;
-
-
-		
-	public:
-		Racer();
     };
 }
 

@@ -36,7 +36,6 @@
 Custom Robot example which has ground sensors and follows a line
 It has also a camera which looks to the front and IR sensors
 */
-
 #include <../../enki/Enki.h>
 #include <QApplication>
 #include <QtGui>
@@ -47,126 +46,125 @@ It has also a camera which looks to the front and IR sensors
 #include <math.h>
 #include <sstream>
 #include <iomanip>
-
 #include "Racer.h"
-#include "Ico.h"
 #include "clbp/Neuron.h"
 #include "clbp/Layer.h"
 #include "clbp/Net.h"
 #include "../lib/Net.cpp"
 #include "../lib/Layer.cpp"
 #include "../lib/Neuron.cpp"
-#include "filterbank.h"
-#include "IcoFilters.h"
+#include "bandpass.h"
+#include "parameters.h"
 
-
-#define reflex //use reflex or icoLearner or bpLearner
-#ifdef icoLearner
-        #define PredDiff //or not defined
-        #define doFilter
-#endif
+#define bpLearner //use reflex or bpLearner
 #ifdef bpLearner
-        #define filterBnk
+        #define filterBank
         #define PredDiff
 #endif
-//#define doFilter //or do filterBank or nofilter
-//#define noFilter
-//#define filterBnk
-//#define PredBinary
-//#define PredDelay
-//#define errorBinary
-
-//#define positionMode
 
 using namespace Enki;
 using namespace std;
 
-double	maxx = 300;
-double	maxy = 300;
+double	maxx = 250;
+double	maxy = 250;
 
 int line=0;
 int iterateCount=0;
 int delay=0;
 
-int nPredictors=6; //this cannot be an odd number for icoLearner
+int nInputs= ROW1N+ROW2N; //+ROW3N; //this cannot be an odd number for icoLearner
+
 #ifdef PredDiff
-int nInputs=nPredictors/2;
+    int nPredictors=nInputs/2;
 #endif
 #ifndef PredDiff
-int nInputs=nPredictors;
+    int nPredictors=nInputs;
 #endif
-#ifdef filterBnk
-int nFilters = 2;
+
+#ifdef filterBank
+int nFilters = NFILTERS;
 #endif
 
 class EnkiPlayground : public EnkiWidget
 {
 protected:
 	Racer* racer;
-    double speed = 90;
+    double speed = SPEED;
     double prevX;
     double prevY;
     double prevA;
-#ifdef icoLearner
-    Ico* ico;
-#endif
+
 #ifdef bpLearner
     Net* net;
+    double* pred = NULL;
+    double* diffpred = NULL;
 #endif
-#ifdef doFilter
-    IcoFilters** icoFilter = 0;
-#endif
-#ifdef filterBnk
-    filterBank** filterBanks= 0;
+#ifdef filterBank
+    Bandpass*** bandpass = 0;
+    double minT = MINT;
+    double maxT = MAXT;
+    double dampingCoeff = DAMPINGCOEFF;
 #endif
     FILE* flog = NULL;
     FILE* errorlog = NULL;
     FILE* fcoord = NULL;
+
 public:
     EnkiPlayground(World *world, QWidget *parent = 0):
 		EnkiWidget(world, parent)
 	{
         flog = fopen("flog.tsv","wt");
         fcoord = fopen("coord.tsv","wt");
-        errorlog=fopen("error.txt","wt");
-        racer = new Racer;
+        errorlog=fopen("error.tsv","wt");
+        racer = new Racer(nInputs);
+        racer->setPreds(ROW1P,ROW1N,ROW1S);
+        racer->setPreds(ROW2P,ROW2N,ROW2S);
+  //      racer->setPreds(ROW3P,ROW3N,ROW3S);
         racer->pos = Point(maxx/2, maxy/2); // x and y of the start point
 		racer->leftSpeed = speed;
 		racer->rightSpeed = speed;
         world->addObject(racer);
-#ifdef filterBnk
-        filterBanks = new filterBank*[nInputs];
-        string filenames[nFilters] = {"h.dat", "hh.dat"};
-        for (int i=0; i<nInputs; i++){
-            filterBanks[i]= new filterBank();
-            filterBanks[i]->setFilters(nFilters);
-            for (int j=0; j<nFilters; j++){
-                filterBanks[i]->setCoeffFiles(j, filenames[j]);
+#ifdef filterBank
+        bandpass = new Bandpass**[nPredictors];
+
+        for(int i=0;i<nPredictors;i++) {
+            if (bandpass != NULL) {
+                bandpass[i] = new Bandpass*[nFilters];
+                 double fs = 1;
+                 double fmin = fs/maxT;
+                 double fmax = fs/minT;
+                 double df = (fmax-fmin)/((double)(nFilters-1));
+                 double f = fmin;
+
+                for(int j=0;j<nFilters;j++) {
+                    bandpass[i][j] = new Bandpass();
+                    bandpass[i][j]->setParameters(f,dampingCoeff);
+                    f = f + df;
+                    for(int k=0;k<maxT;k++) {
+                        double a = 0;
+                        if (k==minT) {
+                            a = 1;
+                        }
+                        double b = bandpass[i][j]->filter(a);
+                        assert(b != NAN);
+                        assert(b != INFINITY);
+                    }
+                    bandpass[i][j]->reset();
+                }
             }
         }
-        nInputs = nInputs * nFilters;
-#endif
-#ifdef icoLearner
-        ico= new Ico(nInputs);
-#endif
-#ifdef bpLearner
-        int nLayers=4;
-        int nNeurons[nLayers]={12,6,3,1};
-        int* nNeuronsp=nNeurons;
-        net = new Net(nLayers, nNeuronsp, nInputs);
-        net->initWeights(Neuron::W_RANDOM, Neuron::B_NONE);
-#endif
-#ifdef doFilter
-        string filename = "h.dat";
 
-        icoFilter= new IcoFilters*[nInputs];
-        for (int i=0; i<nInputs; i++){
-            icoFilter[i]= new IcoFilters();
-            icoFilter[i]->doFIRsetup(filename);
-        }
+        int NetnInputs = nPredictors * nFilters;
 #endif
-#ifdef filterBnk
-        nInputs = nInputs / nFilters;
+
+#ifdef bpLearner
+        int nLayers= NLAYERS;
+        int nNeurons[nLayers]={N1,N2,N3};
+        int* nNeuronsp=nNeurons;
+        net = new Net(nLayers, nNeuronsp, NetnInputs);
+        net->initWeights(Neuron::W_RANDOM, Neuron::B_NONE);
+        pred = new double[nInputs];
+        diffpred = new double[nPredictors];
 #endif
         std::ofstream myfilestat;
         myfilestat.open ("stat.txt", fstream::app);
@@ -183,6 +181,8 @@ public:
         fclose(flog);
         fclose(fcoord);
         fclose(errorlog);
+        delete[] pred;
+        delete[] diffpred;
     }
 
 	// here we do all the behavioural computations
@@ -190,144 +190,64 @@ public:
 	virtual void sceneCompletedHook()
 	{
 
-//        iterateCount=iterateCount+1;
-//        if (iterateCount==500){
-//            racer->pos = Point(0,-60); // x and y of the start point
-//            iterateCount=0;
-//        }
+        int errorGain = ERRORGAIN;
+        int predGain = PREDGAIN;
 
-#ifdef bpLearner
-        int errorGain=1;
-        int predGain=1;
-#endif
-#ifdef icoLearner
-        int errorGain=1;
-        int predGain=1;
-#endif
-
-#ifdef reflex
-        int errorGain=1;
-        int predGain=1;
-#endif
 		double leftGround = racer->groundSensorLeft.getValue();
 		double rightGround = racer->groundSensorRight.getValue();
         double error = errorGain * (leftGround - rightGround);
-       // fprintf(stderr,"program: the error value: %f\n", error);
 
         fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
         fprintf(errorlog, "%e\n", error);
-         //fprintf(errorlog, "%e\t%e\n", leftGround, rightGround);
 
 #ifdef reflex
-        int gain=300;
-        speed=80;
-
-        racer->leftSpeed  = speed + error * gain;
-        racer->rightSpeed = speed - error * gain;
+        racer->leftSpeed  = speed + error;
+        racer->rightSpeed = speed - error;
 #endif
 #ifndef reflex
-        //predictor sensors:
-        double pred[nPredictors]; // exception
-
-        pred[4] = racer->groundSensorFrontP0.getValue();
-        pred[0] = racer->groundSensorFrontP1.getValue();
-        pred[2] = racer->groundSensorFrontP2.getValue();
-//        pred[2] = racer->groundSensorFrontP3.getValue();
-        pred[3] = racer->groundSensorFrontP4.getValue();
-        pred[1] = racer->groundSensorFrontP5.getValue();
-        pred[5] = racer->groundSensorFrontP6.getValue();
-
-#ifdef PredBinary
-        for (int i=0; i<nPredictors; i++){
-            if (pred[i]<0.70){
-                pred[i]=-0.1 * predGain;
-            }
-            else{
-                pred[i]=0;
-            }
+        for(int i=0;i<racer->getNsensors();i++) {
+            pred[i] = -(racer->getSensorArrayValue(i))*10;
+            // workaround of a bug in Enki
+            if (pred[i]<0) pred[i] = 0;
+            //if (i>=racer->getNsensors()/2) fprintf(stderr,"%e ",pred[i]);
         }
-#endif
 
 #ifdef PredDiff
         /* using the difference of the two predictors as the input: */
-        for (int i=0; i<nInputs; i++){
-            pred[i]=1 * (pred[2 * i]-pred[2 * i+1]); //the numbering of the predictors becomes important
-            cout<< "**********" <<pred[i]<<endl;
+        for (int i=0; i<ROW1N/2; i++){
+            diffpred[i]=predGain * (pred[ROW1N-1-i]-pred[i]);
         }
-#endif
-
-#ifdef positionMode
-        cout << ">>>>>>>>>>>>>>" << racer->groundSensorFrontP1.getAbsolutePosition() << endl;
-#endif
-
-#ifdef doFilter
-        double pred_filtered[nInputs];
-        for (int i=0; i<nInputs; i++){
-            pred_filtered[i]=icoFilter[i]->doFIRfilter(pred[i]);
-            cout<<"FILTER "<<i<<endl;
-            fprintf(stderr,"program: the Pred value: %f\n", pred[i]);
-            fprintf(stderr,"program: the Filtered value: %f\n", pred_filtered[i]);
+        for (int i=0; i<ROW2N/2; i++){
+            diffpred[i+ROW1N/2]=predGain * (pred[ROW2N+ROW1N-1-i]-pred[i+ROW1N]);
         }
+//        for (int i=0; i<ROW3N/2; i++){
+//            diffpred[i+ROW1N/2+ROW2N/2]=predGain * (pred[ROW3N+ROW2N+ROW1N-1-i]-pred[i+ROW1N+ROW2N]);
+//        }
 
-        double* pred_pointer=pred_filtered;
+#endif
+#ifndef PredDiff
+        diffpred=pred;
 #endif
 
-#ifdef filterBnk
-        double pred_filtered[nInputs][nFilters];
-        for (int i=0; i<nInputs; i++){
-            cout << "****iteration: "<< i << endl;
-            cout << "Predtor Value is: " << pred[i] << endl;
+#ifdef filterBank
+        double pred_filtered[nPredictors][nFilters];
+        for (int i=0; i<nPredictors; i++){
             for (int j=0; j<nFilters; j++){
-                pred_filtered[i][j]=filterBanks[i]->doFilterBank(j, pred[i]);
-                cout << "The "<< j << "th " << "filtered value is: " << pred_filtered[i][j] << endl;
+                pred_filtered[i][j]=bandpass[i][j]->filter(diffpred[i]);
             }
         }
         double* pred_pointer=pred_filtered[0];
-        cout << pred_pointer[0] << " " << pred_pointer[1] << " " << pred_pointer[2] << " " << pred_pointer[3] << endl;
-
  #endif
 
-#ifdef noFilter
-        double* pred_pointer=pred;
-#endif
-
-#ifdef icoLearner
-        int gain=100;
-
-        ico->setInput(pred_pointer); //takes a pointer in
-        ico->setError(error);
-        ico->setLearningFactor(0.01);
-        ico->updateWeights();
-        ico->doSum();
-        double icoOutput=ico->getOutput();
-        double weightDistance= ico->getWeightsDistance();
-        double weight1= ico->getWeight(0);
-        double weight2= ico->getWeight(1);
-        double error2 = (error + icoOutput) * gain;
-        racer->leftSpeed  = speed; // + error2;
-        racer->rightSpeed = speed - error2;
-
-
-#ifdef positionMode
-        Enki::Point position;
-        position = racer->pos;
-        double angle = racer->angle;
-        //cout<< position.x << " " << position.y <<endl;
-        //cout<< prevX << " " << prevY <<endl;
-        double deltaX = position.x - prevX;
-        double deltaY = position.y - prevY;
-        //cout<< deltaX << " " << deltaY <<endl;
-        prevX=position.x;
-        prevY=position.y;
-#endif
-
+#ifndef filterBank
+        double* pred_pointer=diffpred;
 #endif
 
 #ifdef bpLearner
-        int gain=100;
-        cout<< "MAIN PROGRAM: NEXT ITERATION"<<endl;
+        int Netgain=NETWORKGAIN;
+//        cout<< "MAIN PROGRAM: NEXT ITERATION"<<endl;
         net->setInputs(pred_pointer);
-        double learningRate=0.01;
+        double learningRate= LEARNINGRATE;
         net->setLearningRate(learningRate);
         net->propInputs();
         double leadError=error;
@@ -339,7 +259,7 @@ public:
         double weightDistance=net->getWeightDistance();
         double Output= net->getOutput(0);
         double OutputSum= net->getSumOutput(0);
-        double error2 = (error + Output) * gain;
+        double error2 = error + Output * Netgain;
         racer->leftSpeed  = speed + error2;
         racer->rightSpeed = speed - error2;
 
@@ -348,63 +268,26 @@ public:
 #endif
         line=line+1;
 
-        std::ofstream myfileLeft;
-        myfileLeft.open ("leftGround.txt", fstream::app);
-        myfileLeft << line << " " << leftGround << "\n";
-        myfileLeft.close();
-
-        std::ofstream myfileRight;
-        myfileRight.open ("rightGround.txt", fstream::app);
-        myfileRight << line << " " << rightGround << "\n";
-        myfileRight.close();
-
-        std::ofstream myfile3;
-        myfile3.open ("speeds.txt", fstream::app);
-        myfile3 << line << " " << racer->leftSpeed << " " << racer->rightSpeed << "\n";
-        myfile3.close();
-
-#ifdef icoLearner
-        std::ofstream myfilew;
-        myfilew.open ("weights.txt", fstream::app);
-        myfilew << line << " " << weightDistance << "\n";
-        myfilew.close();
-        std::ofstream myfilew1;
-        myfilew1.open ("weight1.txt", fstream::app);
-        myfilew1 << line << " " << weight1 << "\n";
-        myfilew1.close();
-        std::ofstream myfilew2;
-        myfilew2.open ("weight2.txt", fstream::app);
-        myfilew2 << line << " " << weight2 << "\n";
-        myfilew2.close();
-#endif
-
-#ifndef reflex
-#ifndef noFilter
-        std::ofstream myfilep[nInputs];
+#ifdef filterBank
+        std::ofstream myfilep[nPredictors];
         char c = '0';
-        for (int p=0; p<nInputs; p++){
+        for (int p=0; p<nPredictors; p++){
             string s = "predictor";
             c += 1;
             s += c;
             s += ".txt";
         myfilep[p].open (s, fstream::app);
         myfilep[p] << line << " " << pred[p] << " ";
-#ifdef doFilter
-        myfilep[p] << pred_filtered[p]<< "\n";
-#endif
-#ifdef filterBnk
         myfilep[p] << pred_filtered[p][0] << " "<< pred_filtered[p][1] << "\n";
-#endif
         myfilep[p].close();
         }
-#endif
 #endif
 	}
 };
 
 int main(int argc, char *argv[])
 {
-    srand(3);
+    srand(5);
     QApplication app(argc, argv);
     QImage gt;
     gt = QGLWidget::convertToGLFormat(QImage("cc.png"));
