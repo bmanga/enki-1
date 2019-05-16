@@ -57,7 +57,7 @@ namespace Enki
             return groundSensorArray[index]->getValue();
         }
 
-        void setPreds(int _predPos, int _nPred, int _spacing);
+        void setPreds(int _predPos, int _nPred, double _spacing);
 
         int nSensors;
 

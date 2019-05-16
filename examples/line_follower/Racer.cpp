@@ -34,7 +34,7 @@
 
 #include "Racer.h"
 
-
+using namespace std;
 namespace Enki
 {
     Racer::Racer(int _nSensors):
@@ -64,11 +64,14 @@ namespace Enki
     }
 }
 
-    void Racer::setPreds(int _predPos, int _nPred, int _spacing){
-        int startPoint=(_nPred -1) * _spacing;
-        for (int i=iterate; i<_nPred+iterate; i++){
-            groundSensorArray[i]= new GroundSensor(this, Vector(_predPos , -startPoint+ i * _spacing), 0, 1, 1, -0.731059,2);
+    void Racer::setPreds(int _predPos, int _nPred, double _spacing){
+        double startPoint=((_nPred -1) * _spacing)/2;
+        int j=0;
+        for (int i=iterate; i<_nPred+iterate; i++){            
+            groundSensorArray[i]= new GroundSensor(this, Vector(_predPos , -startPoint + j * _spacing), 0, 1, 1, -0.731059,2);
+            //cout << "i is:  "<< i <<"  position is:  "<< _predPos << "  and  " <<-startPoint + j * _spacing << "  n  "<< _nPred << "  s  " << _spacing <<endl;
             addLocalInteraction(groundSensorArray[i]);
+            j++;
         }
         iterate += _nPred;
     }
