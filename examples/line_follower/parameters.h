@@ -3,6 +3,12 @@
 
 #endif // PARAMETERS_H
 
+
+#define STEPSCOUNT 10
+#define RUNSCOUNT 3
+
+#define LEARNINGRATECOUNT 5
+
 // Predictor Array
 #define ROW1P 12
 #define ROW1N 8
@@ -27,7 +33,8 @@
 #define DAMPINGCOEFF 0.51
 
 // Network Structure
-#define LEARNINGRATE 0.001
+#define LEARNINGRATE 0.1
+#define DESIREDLEARNINGRATE 0.01
 
 #define NLAYERS 3
     #define N1 12
