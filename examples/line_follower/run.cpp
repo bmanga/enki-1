@@ -58,6 +58,7 @@ It has also a camera which looks to the front and IR sensors
 
 #define learning
 //#define reflex
+#define doStats
 
 
 using namespace Enki;
@@ -66,10 +67,9 @@ using namespace std;
 double	maxx = 250;
 double	maxy = 250;
 
-int line=0;
-int iterateCount=0;
-int delay=0;
-
+int countSteps=0;
+int countSteps2=0;
+int countRuns=0;
 
     int nInputs= ROW1N+ROW2N+ROW3N; //this cannot be an odd number for icoLearner
 #ifdef learning
@@ -209,9 +209,11 @@ public:
 		double leftGround = racer->groundSensorLeft.getValue();
 		double rightGround = racer->groundSensorRight.getValue();
         double error = (leftGround - rightGround);
-
+#ifndef stop
         fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
-        fprintf(errorlog, "%e\n", error);
+#endif
+
+        fprintf(errorlog, "%e\t", error);
 
         error = error * errorGain;
 
@@ -240,22 +242,28 @@ public:
             diffpred[i+ROW1N/2+ROW2N/2]= (pred[ROW3N+ROW2N+ROW1N-1-i]-pred[i+ROW1N+ROW2N]);
         }
 
+#ifndef stop
         for(int i=0; i<nPredictors; i++) {
             fprintf(predlog,"%e\t",diffpred[i]);
         }
         fprintf(predlog,"\n");
+#endif
 
         double pred_filtered[nPredictors][nFilters];
         for (int i=0; i<nPredictors; i++){
             for (int j=0; j<nFilters; j++){
                 pred_filtered[i][j]=bandpass[i][j]->filter(diffpred[i]);
+#ifndef stop
                 fprintf(filtlog[j],"%e\t",pred_filtered[i][j]);
+#endif
                 pred_filtered[i][j]= predGain * pred_filtered[i][j];
             }
         }
+#ifndef stop
         for (int i=0; i<nFilters; i++){
             fprintf(filtlog[i],"\n");
         }
+#endif
 
         double* pred_pointer= pred_filtered[0];
 
@@ -272,7 +280,9 @@ public:
         double weightDistance1=net->getWeightDistanceLayer(0);
         double weightDistance2=net->getWeightDistanceLayer(1);
         double weightDistance3=net->getWeightDistanceLayer(2);
+#ifndef stop
         fprintf(wlog, "%e\t%e\t%e\n", weightDistance1,weightDistance2,weightDistance3);
+#endif
         double Output= net->getOutput(0);
         double OutputSum= net->getSumOutput(0);
         double error2 = error + Output * Netgain;
@@ -280,7 +290,38 @@ public:
         racer->rightSpeed = speed - error2;
 
 #endif
-        line=line+1;
+#ifndef stop
+        countSteps ++;
+        if (countSteps == STEPSCOUNT){
+            #define stop
+            }
+#endif
+#ifdef stop
+        countSteps2 ++;
+        if (countSteps2 == STEPSCOUNT){
+            countSteps2 =0;
+            fprintf(errorlog, "\n");
+            countRuns ++;
+            racer->pos = Point(maxx/2 +30, maxy/2 +5);
+            racer->angle=0;
+            racer->leftSpeed = speed;
+            racer->rightSpeed = speed;
+#ifdef learning
+            net->initWeights(Neuron::W_RANDOM, Neuron::B_NONE);
+#endif
+            if (countRuns == RUNSCOUNT){
+#ifdef learning
+                learningRate = learningRate / 10;
+                net->setLearningRate(learningRate);
+                learningRateCount ++;
+                if (learningRateCount == LEARNINGRATECOUNT){
+                    qApp->quit();
+                }
+#endif
+                qApp->quit();
+            }
+        }
+#endif
 	}
 };
 
